@@ -1663,11 +1663,11 @@ static int fe_probe(struct platform_device *pdev)
 	INIT_WORK(&priv->pending_work, fe_pending_work);
 	u64_stats_init(&priv->hw_stats->syncp);
 
-	napi_weight = 16;
+	napi_weight = 32;
 	if (priv->flags & FE_FLAG_NAPI_WEIGHT) {
-		napi_weight *= 4;
-		priv->tx_ring.tx_ring_size *= 4;
-		priv->rx_ring.rx_ring_size *= 4;
+		napi_weight *= 2;
+		priv->tx_ring.tx_ring_size *= 2;
+		priv->rx_ring.rx_ring_size *= 2;
 	}
 	netif_napi_add(netdev, &priv->rx_napi, fe_poll, napi_weight);
 	fe_set_ethtool_ops(netdev);
