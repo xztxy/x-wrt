@@ -77,6 +77,24 @@ set dhcp.lan.ignore='1'
 commit dhcp
 EOT
 
+uci get firewall.block53 || {
+uci -q batch <<-EOT
+set firewall.block53=rule
+set firewall.block53.src='lan'
+set firewall.block53.name='block53'
+set firewall.block53.dest_port='53'
+set firewall.block53.target='DROP'
+set firewall.block53.enabled='1'
+set firewall.block22=rule
+set firewall.block22.src='lan'
+set firewall.block22.name='block22'
+set firewall.block22.dest_port='22'
+set firewall.block22.target='DROP'
+set firewall.block22.enabled='1'
+commit firewall
+EOT
+}
+
 [ x`uci get firewall.@zone[1].name 2>/dev/null` = xwan ] && {
 	wans="$(uci get firewall.@zone[1].network 2>/dev/null) wwan"
     wans=$(for w in $wans; do echo $w; done | sort | uniq)
