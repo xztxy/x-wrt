@@ -1,21 +1,12 @@
 #!/bin/sh /etc/rc.common
-# Copyright (C) 2006-2011 OpenWrt.org
+# Copyright (C) 2022 x-wrt.com
 
 START=95
+USE_PROCD=1
 
-start() {
-	uci get network.@switch[0] >/dev/null 2>&1 || return
-	SERVICE_DAEMONIZE=1 service_start /sbin/switch_ports_status start
-}
-
-stop() {
-	/sbin/switch_ports_status stop
-}
-
-restart() {
-	start
-}
-
-reload() {
-	start
+start_service() {
+	procd_open_instance
+	procd_set_param respawn
+	procd_set_param command /sbin/switch_ports_status
+	procd_close_instance
 }
