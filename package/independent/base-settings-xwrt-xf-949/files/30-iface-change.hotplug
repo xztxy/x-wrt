@@ -1,0 +1,32 @@
+dhcp_is_on() {
+        local ifname="$1"
+        local rv=1
+        udhcpc -n -q -s /bin/true -t 3 -i "$ifname" >&- && rv=0 || rv=1
+        return $rv
+}
+
+handle_if_event() {
+	echo "1" >/proc/sys/net/bridge/bridge-nf-call-iptables
+	iptables -C INPUT -i $ifname -p udp -m udp --dport 67 -m comment --comment "block-dhcp-input-$ifname" -j DROP || \
+	iptables -I INPUT -i $ifname -p udp -m udp --dport 67 -m comment --comment "block-dhcp-input-$ifname" -j DROP
+	if ! dhcp_is_on br-lan; then
+		iptables -D INPUT -i $ifname -p udp -m udp --dport 67 -m comment --comment "block-dhcp-input-$ifname" -j DROP
+	fi
+}
+
+case "$ACTION" in
+	add|ifchange)
+		case "$INTERFACE" in
+			eth0.1)
+				ifname="$INTERFACE" handle_if_event
+			;;
+		esac
+	;;
+	ifup|ifupdate)
+		case "$DEVICE" in
+			eth0.1)
+				ifname="$DEVICE" handle_if_event
+			;;
+		esac
+	;;
+esac
