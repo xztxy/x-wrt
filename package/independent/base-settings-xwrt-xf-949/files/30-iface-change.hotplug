@@ -6,6 +6,8 @@ dhcp_is_on() {
 }
 
 handle_if_event() {
+	mkdir -p /var/run
+	lock /var/run/iface-change.lck
 	ebtables -L INPUT | grep -q -- "-p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP" || \
 	ebtables -A INPUT -p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP
 
@@ -18,12 +20,13 @@ handle_if_event() {
 	if ! dhcp_is_on br-lan; then
 		ebtables -D INPUT -p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP
 	fi
+	lock -u /var/run/iface-change.lck
 }
 
 case "$ACTION" in
 	add|ifchange)
 		case "$INTERFACE" in
-			eth0.1)
+			eth0.1|br-lan)
 				ifname="$INTERFACE" handle_if_event
 			;;
 		esac

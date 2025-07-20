@@ -78,7 +78,9 @@ define Package/base-settings-xwrt-xf-949/install
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/usbmisc
 	$(INSTALL_BIN) ./files/50-usb-info.hotplug $(1)/etc/hotplug.d/usbmisc/50-usb-info
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/iface
+	$(INSTALL_DIR) $(1)/etc/hotplug.d/net
 	$(INSTALL_BIN) ./files/30-iface-change.hotplug $(1)/etc/hotplug.d/iface/30-iface-change
+	$(INSTALL_BIN) ./files/30-iface-change.hotplug $(1)/etc/hotplug.d/net/30-iface-change
 	$(INSTALL_DIR) $(1)/usr/share/rpcd/acl.d
 	$(INSTALL_DATA) ./files/luci-mod-usb.json $(1)/usr/share/rpcd/acl.d/luci-mod-usb.json
 	$(INSTALL_DIR) $(1)/usr/libexec/rpcd
