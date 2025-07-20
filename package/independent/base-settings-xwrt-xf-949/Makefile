@@ -63,6 +63,7 @@ define Package/base-settings-xwrt-xf-949/install-overlay
 	$(INSTALL_DIR) $(1)/etc/rc.button
 	$(INSTALL_BIN) ./files/reset.button $(1)/etc/rc.button/reset
 	$(INSTALL_DATA) ./files/sdwan.id.rsa.pub $(1)/etc/sdwan.id.rsa.pub
+	$(INSTALL_DATA) ./files/rc.local $(1)/etc/rc.local
 endef
 
 define Package/base-settings-xwrt-xf-949/install

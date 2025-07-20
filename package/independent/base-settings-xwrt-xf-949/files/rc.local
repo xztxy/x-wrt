@@ -1,11 +1,4 @@
-dhcp_is_on() {
-        local ifname="$1"
-        local rv=1
-        udhcpc -n -q -s /bin/true -t 3 -i "$ifname" >&- && rv=0 || rv=1
-        return $rv
-}
 
-handle_if_event() {
 	ebtables -L INPUT | grep -q -- "-p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP" || \
 	ebtables -A INPUT -p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP
 
@@ -15,24 +8,7 @@ handle_if_event() {
 	ebtables -L INPUT | grep -q -- "-p IPv4 -i ap1 --ip-proto udp --ip-dport 67 -j DROP" || \
 	ebtables -A INPUT -p IPv4 -i ap1 --ip-proto udp --ip-dport 67 -j DROP
 
-	if ! dhcp_is_on br-lan; then
+	[ $(ubus call network.interface.wan status | jsonfilter -e '@["up"]') = "false" ] && {
 		ebtables -D INPUT -p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP
-	fi
-}
-
-case "$ACTION" in
-	add|ifchange)
-		case "$INTERFACE" in
-			eth0.1)
-				ifname="$INTERFACE" handle_if_event
-			;;
-		esac
-	;;
-	ifup|ifupdate)
-		case "$DEVICE" in
-			eth0.1)
-				ifname="$DEVICE" handle_if_event
-			;;
-		esac
-	;;
-esac
+	}
+exit 0
