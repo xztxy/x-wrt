@@ -26,12 +26,6 @@ var callLanStatus = rpc.declare({
 	expect: { }
 });
 
-var callLanapStatus = rpc.declare({
-	object: 'network.interface.lanap',
-	method: 'status',
-	expect: { }
-});
-
 return baseclass.extend({
 	title: _('Printer Info'),
 
@@ -40,8 +34,7 @@ return baseclass.extend({
 			L.resolveDefault(callUsbInfo(), {}),
 			L.resolveDefault(callWwanStatus(), {}),
 			L.resolveDefault(callWanStatus(), {}),
-			L.resolveDefault(callLanStatus(), {}),
-			L.resolveDefault(callLanapStatus(), {})
+			L.resolveDefault(callLanStatus(), {})
 		]);
 	},
 
@@ -50,7 +43,6 @@ return baseclass.extend({
 		var wwan = data[1];
 		var wan = data[2];
 		var lan = data[3];
-		var lanap = data[4];
 
 		if (wwan['ipv4-address'] && wwan['ipv4-address'][0] && wwan['ipv4-address'][0]['address'])
 			wwan = wwan['ipv4-address'][0]['address'];
@@ -67,17 +59,12 @@ return baseclass.extend({
 		else
 			lan = "-";
 
-		if (lanap['ipv4-address'] && lanap['ipv4-address'][0] && lanap['ipv4-address'][0]['address'])
-			lanap = lanap['ipv4-address'][0]['address'];
-		else
-			lanap = "-";
-
 		var fields = [
 			_('USB Info'),         usbinfo.info ? usbinfo.info : "-",
 			_('WiFi STA'),             wwan,
 			_('LAN Port') + "(" + _('auto') + ")",              wan,
-			_('LAN Port'),              lan,
-			_('WiFi AP'),            lanap
+			_('Management IP'),              lan,
+			_('WiFi AP'),            lan
 		];
 
 		var table = E('table', { 'class': 'table' });
