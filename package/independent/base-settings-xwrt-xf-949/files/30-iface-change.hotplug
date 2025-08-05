@@ -6,7 +6,9 @@ dhcp_is_on() {
 }
 
 handle_if_event() {
+	need_reload=0
 	mkdir -p /var/run
+	test -e /var/run/iface-change.running && return
 	lock /var/run/iface-change.lck
 	ebtables -L INPUT | grep -q -- "-p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP" || \
 	ebtables -A INPUT -p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP
@@ -14,12 +16,58 @@ handle_if_event() {
 	ebtables -L FORWARD | grep -q -- "-p IPv4 -i ap0 -o eth0.1 --ip-proto udp --ip-dport 67 -j DROP" || \
 	ebtables -A FORWARD -p IPv4 -i ap0 -o eth0.1 --ip-proto udp --ip-dport 67 -j DROP
 
+	ebtables -L FORWARD | grep -q -- "-p IPv4 -i ap1 -o eth0.1 --ip-proto udp --ip-dport 67 -j DROP" || \
+	ebtables -A FORWARD -p IPv4 -i ap1 -o eth0.1 --ip-proto udp --ip-dport 67 -j DROP
 	ebtables -L INPUT | grep -q -- "-p IPv4 -i ap1 --ip-proto udp --ip-dport 67 -j DROP" || \
 	ebtables -A INPUT -p IPv4 -i ap1 --ip-proto udp --ip-dport 67 -j DROP
 
 	if ! dhcp_is_on br-lan; then
 		ebtables -D INPUT -p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP
 	fi
+
+	wan_ip=$(ubus call network.interface.wan status | jsonfilter -e '@["ipv4-address"][0].address')
+	test -n "${wan_ip}" || wan_ip=$(ubus call network.interface.wwan status | jsonfilter -e '@["ipv4-address"][0].address')
+	if test -n "${wan_ip}"; then
+		subfix="打印机IP"
+		lang="$(uci get luci.main.lang)"
+		if [ "$lang" = "en" ]; then
+			subfix="_Printer"
+		fi
+		SSID="$(uci get base_config.@status[0].SSID)"
+		wifinet1ssid="${wan_ip}@${SSID//*_/}${subfix}"
+
+		oldssid="$(uci get wireless.wifinet1.ssid)"
+		disabled="$(uci get wireless.wifinet1.disabled)"
+		if [ "$oldssid" = "${wifinet1ssid}" ]; then
+			:
+		else
+			uci set wireless.wifinet1.ssid="${wifinet1ssid}"
+			disabled=1
+		fi
+
+		if [ "$disabled" = "1" ]; then
+			uci set wireless.wifinet1.disabled="0"
+			uci commit wireless
+			need_reload=1
+		fi
+	else
+		disabled="$(uci get wireless.wifinet1.disabled)"
+		if [ "$disabled" = "1" ]; then
+			:
+		else
+			uci set wireless.wifinet1.disabled="1"
+			uci commit wireless
+			need_reload=1
+		fi
+	fi
+
+	if [ "$need_reload" = "1" ]; then
+		touch /var/run/iface-change.running
+		/etc/init.d/network reload
+		sleep 10
+		rm -f /var/run/iface-change.running
+	fi
+
 	lock -u /var/run/iface-change.lck
 }
 

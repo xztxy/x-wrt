@@ -1,17 +1,4 @@
 
-	mkdir -p /var/run
-	lock /var/run/iface-change.lck
-	ebtables -L INPUT | grep -q -- "-p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP" || \
-	ebtables -A INPUT -p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP
+env -i ACTION="ifchange" INTERFACE="br-lan" LINK=1 /sbin/hotplug-call iface
 
-	ebtables -L FORWARD | grep -q -- "-p IPv4 -i ap0 -o eth0.1 --ip-proto udp --ip-dport 67 -j DROP" || \
-	ebtables -A FORWARD -p IPv4 -i ap0 -o eth0.1 --ip-proto udp --ip-dport 67 -j DROP
-
-	ebtables -L INPUT | grep -q -- "-p IPv4 -i ap1 --ip-proto udp --ip-dport 67 -j DROP" || \
-	ebtables -A INPUT -p IPv4 -i ap1 --ip-proto udp --ip-dport 67 -j DROP
-
-	[ $(ubus call network.interface.wan status | jsonfilter -e '@["up"]') = "false" ] && {
-		ebtables -D INPUT -p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP
-	}
-	lock -u /var/run/iface-change.lck
 exit 0

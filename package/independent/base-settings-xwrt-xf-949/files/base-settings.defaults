@@ -124,6 +124,7 @@ uci add_list system.ntp.server='ntp3.aliyun.com'
 uci add_list system.ntp.server='ntp4.aliyun.com'
 
 uci set system.led_wifi_led.mode='link tx rx'
+uci set system.led_wifi_led.dev="ap0"
 
 uci set system.usb='led'
 uci set system.usb.name='usb'
