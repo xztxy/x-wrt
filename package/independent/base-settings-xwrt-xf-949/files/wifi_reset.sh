@@ -17,7 +17,7 @@ sleep 1
 /etc/init.d/led restart
 ) &
 
-uci set wireless.wifinet1.disabled='1'
+uci set wireless.wifinet2.disabled='1'
 uci commit wireless
 /etc/init.d/network reload
 
