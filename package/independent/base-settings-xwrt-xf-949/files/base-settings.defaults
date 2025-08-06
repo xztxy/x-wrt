@@ -31,6 +31,7 @@ SSID="$(uci get base_config.@status[0].SSID)"
 
 uci -q batch <<-EOT
 set wireless.radio0.channel='auto'
+set wireless.radio0.noscan='1'
 
 set wireless.wifinet0=wifi-iface
 set wireless.wifinet0.device='radio0'
