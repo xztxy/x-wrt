@@ -50,7 +50,8 @@ set wireless.wifinet1.encryption='psk-mixed'
 set wireless.wifinet1.key='88888888'
 set wireless.wifinet1.ifname='ap1'
 set wireless.wifinet1.network='lan'
-set wireless.wifinet1.disabled='1'
+set wireless.wifinet1.disabled='0'
+set wireless.wifinet1.hidden='1'
 
 set wireless.wifinet2=wifi-iface
 set wireless.wifinet2.device='radio0'

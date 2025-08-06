@@ -37,25 +37,25 @@ handle_if_event() {
 		wifinet1ssid="${wan_ip}@${SSID//*_/}${subfix}"
 
 		oldssid="$(uci get wireless.wifinet1.ssid)"
-		disabled="$(uci get wireless.wifinet1.disabled)"
+		hidden="$(uci get wireless.wifinet1.hidden)"
 		if [ "$oldssid" = "${wifinet1ssid}" ]; then
 			:
 		else
 			uci set wireless.wifinet1.ssid="${wifinet1ssid}"
-			disabled=1
+			hidden=1
 		fi
 
-		if [ "$disabled" = "1" ]; then
-			uci set wireless.wifinet1.disabled="0"
+		if [ "$hidden" = "1" ]; then
+			uci set wireless.wifinet1.hidden="0"
 			uci commit wireless
 			need_reload=1
 		fi
 	else
-		disabled="$(uci get wireless.wifinet1.disabled)"
-		if [ "$disabled" = "1" ]; then
+		hidden="$(uci get wireless.wifinet1.hidden)"
+		if [ "$hidden" = "1" ]; then
 			:
 		else
-			uci set wireless.wifinet1.disabled="1"
+			uci set wireless.wifinet1.hidden="1"
 			uci commit wireless
 			need_reload=1
 		fi
