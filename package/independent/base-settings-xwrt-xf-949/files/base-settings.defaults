@@ -135,6 +135,14 @@ uci set system.usb.trigger='usbport'
 
 uci commit system
 
+uci set dhcp.@domain[0]=domain
+uci set dhcp.@domain[0].name='print.ug.link'
+uci set dhcp.@domain[0].ip='192.168.15.1'
+uci set dhcp.@domain[1]=domain
+uci set dhcp.@domain[1].name='print.ug'
+uci set dhcp.@domain[1].ip='192.168.15.1'
+uci commit dhcp
+
 uci set p910nd.@p910nd[0].enabled='1'
 uci commit p910nd
 
