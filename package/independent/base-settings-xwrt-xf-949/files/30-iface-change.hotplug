@@ -48,7 +48,7 @@ handle_if_event() {
 		if [ "$hidden" = "1" ]; then
 			uci set wireless.wifinet1.hidden="0"
 			uci commit wireless
-			need_reload=1
+			need_reload=2
 		fi
 	else
 		hidden="$(uci get wireless.wifinet1.hidden)"
@@ -64,7 +64,11 @@ handle_if_event() {
 	if [ "$need_reload" = "1" ]; then
 		touch /var/run/iface-change.running
 		/etc/init.d/network reload
-		sleep 10
+		rm -f /var/run/iface-change.running
+	elif [ "$need_reload" = "2" ]; then
+		touch /var/run/iface-change.running
+		/etc/init.d/network reload
+		sleep 15
 		rm -f /var/run/iface-change.running
 	fi
 
