@@ -6,9 +6,8 @@ dhcp_is_on() {
 }
 
 handle_if_event() {
-	need_reload=0
+	logger -t handle_if_event ifname=$ifname ACTION=$ACTION
 	mkdir -p /var/run
-	test -e /var/run/iface-change.running && return
 	lock /var/run/iface-change.lck
 	ebtables -L INPUT | grep -q -- "-p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP" || \
 	ebtables -A INPUT -p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP
@@ -24,6 +23,18 @@ handle_if_event() {
 	if ! dhcp_is_on br-lan; then
 		ebtables -D INPUT -p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP
 	fi
+	lock -u /var/run/iface-change.lck
+}
+
+handle_if_event_net() {
+	logger -t handle_if_event_net ifname=$ifname ACTION=$ACTION
+	need_reload=0
+	mkdir -p /var/run
+	test -e /var/run/iface-change.running && test -e /var/run/iface-change.running.wait && return
+	test -e /var/run/iface-change.running && touch /var/run/iface-change.running.wait
+
+	lock /var/run/iface-change-net.lck
+	rm /var/run/iface-change.running.wait
 
 	wan_ip=$(ubus call network.interface.wan status | jsonfilter -e '@["ipv4-address"][0].address')
 	test -n "${wan_ip}" || wan_ip=$(ubus call network.interface.wwan status | jsonfilter -e '@["ipv4-address"][0].address')
@@ -63,30 +74,45 @@ handle_if_event() {
 
 	if [ "$need_reload" = "1" ]; then
 		touch /var/run/iface-change.running
-		/etc/init.d/network reload
+		logger -t handle_if_event_net ifname=$ifname ACTION=$ACTION reload network set wifi off
+		ubus call network reload
+		sleep 30
 		rm -f /var/run/iface-change.running
 	elif [ "$need_reload" = "2" ]; then
 		touch /var/run/iface-change.running
-		/etc/init.d/network reload
-		sleep 15
+		logger -t handle_if_event_net ifname=$ifname ACTION=$ACTION reload network set wifi on
+		ubus call network reload
+		sleep 30
 		rm -f /var/run/iface-change.running
 	fi
 
-	lock -u /var/run/iface-change.lck
+	lock -u /var/run/iface-change-net.lck
 }
 
 case "$ACTION" in
 	add|ifchange)
 		case "$INTERFACE" in
-			eth0.1|br-lan)
-				ifname="$INTERFACE" handle_if_event
+			eth0.1)
+				ifname="$INTERFACE" handle_if_event &
+			;;
+			br-lan)
+				ifname="$INTERFACE" handle_if_event_net &
+			;;
+			wlan0)
+				ifname="$INTERFACE" handle_if_event_net &
 			;;
 		esac
 	;;
 	ifup|ifupdate)
 		case "$DEVICE" in
 			eth0.1)
-				ifname="$DEVICE" handle_if_event
+				ifname="$DEVICE" handle_if_event &
+			;;
+			br-lan)
+				ifname="$DEVICE" handle_if_event_net &
+			;;
+			wlan0)
+				ifname="$DEVICE" handle_if_event_net &
 			;;
 		esac
 	;;
