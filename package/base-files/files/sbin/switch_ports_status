@@ -158,15 +158,9 @@ trigger_event()
 		status="$(ubus call $line status 2>/dev/null)"
 		if echo "$status" | grep -q "\"device\": \"$DEVICE\"," && echo "$status" | grep -q '"up": true,'; then
 			if echo "$status" | grep -q '"proto": "dhcp"'; then
-				dhcp_pid=$(cat /var/run/udhcpc-${DEVICE}.pid)
-				if test -e /sys/class/net/${DEVICE}/brif && test -n "${dhcp_pid}"; then
-					LOG "EVENT($EVENT): DEVICE=$DEVICE $line notify dhcp renew"
-					kill -USR1 ${dhcp_pid}
-				else
 					LOG "EVENT($EVENT): DEVICE=$DEVICE $line ubus call down/up"
 					ubus call $line down
 					ubus call $line up
-				fi
 			elif echo "$status" | grep -q '"proto": "pppoe"'; then
 				LOG "EVENT($EVENT): DEVICE=$DEVICE $line ubus call down/up"
 				ubus call $line down
