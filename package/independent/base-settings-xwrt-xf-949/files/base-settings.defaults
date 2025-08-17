@@ -30,7 +30,7 @@ SSID="Printer Manager" SSID_PASSWD="88888888" wifi_first_init
 SSID="$(uci get base_config.@status[0].SSID)"
 
 uci -q batch <<-EOT
-set wireless.radio0.channel='11'
+set wireless.radio0.channel=$(($(hexdump -e '"%u"' -n1 /dev/urandom) % 12 + 1))
 set wireless.radio0.noscan='1'
 
 set wireless.wifinet0=wifi-iface
