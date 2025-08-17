@@ -100,7 +100,7 @@ body {
 /*
  * scaffholding
  */
- .mainmenu-item-logout,.mainmenu-item-networksetup,.mainmenu-item-wifiwizard {
+ .mainmenu-item-logout,.mainmenu-item-networksetup,.mainmenu-item-wifiwizard,.mainmenu-item-raw-printer {
 	 margin-top: 25px;
  }
 #menubar {
