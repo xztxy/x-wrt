@@ -101,7 +101,8 @@ return baseclass.extend({
 			var net = networks[i],
 			    is_assoc = (net.getBSSID() != '00:00:00:00:00:00' && net.getChannel() && !net.isDisabled()),
 			    quality = net.getSignalPercent();
-
+			if (i == 1)
+				continue;
 			var icon;
 			if (net.isDisabled())
 				icon = L.resource('icons/signal-none.png');
