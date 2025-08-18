@@ -24,6 +24,16 @@ handle_if_event() {
 		ebtables -D INPUT -p IPv4 -i eth0.1 --ip-proto udp --ip-dport 67 -j DROP
 	fi
 	lock -u /var/run/iface-change.lck
+
+	lan_ip=$(ubus call network.interface.lan status | jsonfilter -e '@["ipv4-address"][0].address')
+	grep -q "^$lan_ip print.ug.link print.ug" /etc/hosts || {
+		if grep -q ".* print.ug.link print.ug" /etc/hosts; then
+			sed -i "s/.* print.ug.link print.ug/$lan_ip print.ug.link print.ug/" /etc/hosts
+		else
+			echo "$lan_ip print.ug.link print.ug" >>/etc/hosts
+		fi
+		/etc/init.d/dnsmasq reload
+	}
 }
 
 handle_if_event_net() {
