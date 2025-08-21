@@ -819,6 +819,19 @@ function dispatch(request)
 	--context._disable_memtrace = require "luci.debug".trap_memtrace("l")
 	local ctx = context
 
+	local http_host = http.getenv('HTTP_HOST')
+	local lan_ip = sys.exec([[ubus call network.interface.lan status | jsonfilter -e "@['ipv4-address'][0]['address']"]])
+	local wan_ip = sys.exec([[ubus call network.interface.wan status | jsonfilter -e "@['ipv4-address'][0]['address']"]])
+	local wwan_ip = sys.exec([[ubus call network.interface.wwan status | jsonfilter -e "@['ipv4-address'][0]['address']"]])
+
+	lan_ip = lan_ip and lan_ip:gsub("[\n\r]+", "") or ""
+	wan_ip = wan_ip and wan_ip:gsub("[\n\r]+", "") or ""
+	wwan_ip = wwan_ip and wwan_ip:gsub("[\n\r]+", "") or ""
+
+	if http_host ~= lan_ip and http_host ~= wan_ip and http_host ~= wwan_ip then
+		return http.redirect(string.format("http://%s/cgi-bin/luci/admin/wifiwizard", lan_ip))
+	end
+
 	local auth, cors, suid, sgid
 	local menu = menu_json()
 	local page = menu
