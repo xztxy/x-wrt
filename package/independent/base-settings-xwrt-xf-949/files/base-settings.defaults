@@ -145,6 +145,9 @@ uci set dhcp.@domain[1].name='print.ug'
 uci set dhcp.@domain[1].ip='192.168.15.1'
 uci commit dhcp
 
+uci delete uhttpd.main.listen_https
+uci commit uhttpd
+
 uci set p910nd.@p910nd[0].enabled='1'
 uci commit p910nd
 
