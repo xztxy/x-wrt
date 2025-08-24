@@ -81,6 +81,10 @@ body {
 	background:url(./networksetup.svg) no-repeat;
 	background-position: 10px 4px;
 }
+.mainmenu-item-networksetup_wifiap{
+	background:url(./networksetup_wifiap.svg) no-repeat;
+	background-position: 10px 4px;
+}
 .l1>.mainmenu-item-system{
 	background:url(./system.svg) no-repeat;
 	background-position: 10px 4px;
@@ -100,7 +104,7 @@ body {
 /*
  * scaffholding
  */
- .mainmenu-item-logout,.mainmenu-item-networksetup,.mainmenu-item-wifiwizard,.mainmenu-item-raw-printer {
+ .mainmenu-item-logout,.mainmenu-item-networksetup,.mainmenu-item-networksetup_wifiap,.mainmenu-item-wifiwizard,.mainmenu-item-raw-printer,.mainmenu-item-system {
 	 margin-top: 25px;
  }
 #menubar {
