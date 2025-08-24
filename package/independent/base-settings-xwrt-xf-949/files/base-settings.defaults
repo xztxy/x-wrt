@@ -135,7 +135,7 @@ uci set system.usb.trigger='usbport'
 
 uci commit system
 
-uci set dhcp.wan.ignore='0'
+uci delete dhcp.wan
 
 uci set dhcp.@domain[0]=domain
 uci set dhcp.@domain[0].name='print.ug.link'
