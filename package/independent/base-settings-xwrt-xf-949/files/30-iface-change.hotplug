@@ -49,13 +49,8 @@ handle_if_event_net() {
 	wan_ip=$(ubus call network.interface.wan status | jsonfilter -e '@["ipv4-address"][0].address')
 	test -n "${wan_ip}" || wan_ip=$(ubus call network.interface.wwan status | jsonfilter -e '@["ipv4-address"][0].address')
 	if test -n "${wan_ip}"; then
-		subfix="打印机IP"
-		lang="$(uci get luci.main.lang)"
-		if [ "$lang" = "en" ]; then
-			subfix="_Printer"
-		fi
 		SSID="$(uci get base_config.@status[0].SSID)"
-		wifinet1ssid="${wan_ip}@${SSID//*_/}${subfix}"
+		wifinet1ssid="${wan_ip}@Printer_${SSID//*_/}"
 
 		oldssid="$(uci get wireless.wifinet1.ssid)"
 		hidden="$(uci get wireless.wifinet1.hidden)"
