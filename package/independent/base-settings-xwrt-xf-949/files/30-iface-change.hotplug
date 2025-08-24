@@ -102,17 +102,57 @@ handle_if_event_net() {
 	lock -u /var/run/iface-change-net.lck
 }
 
+handle_if_event_fw()
+{
+	wan_ip=$(ubus call network.interface.wan status | jsonfilter -e '@["ipv4-address"][0].address')
+	wwan_ip=$(ubus call network.interface.wwan status | jsonfilter -e '@["ipv4-address"][0].address')
+
+	test -n "${wan_ip}" || test -n "${wwan_ip}" || {
+		test -e /tmp/dnsmasq.d/all.conf || {
+			iptables -t nat -C prerouting_lan_rule -p udp --dport 53 -j REDIRECT --to-ports 53 2>/dev/null || \
+			iptables -t nat -A prerouting_lan_rule -p udp --dport 53 -j REDIRECT --to-ports 53
+			iptables -t nat -C prerouting_lan_rule -p tcp --dport 53 -j REDIRECT --to-ports 53 2>/dev/null || \
+			iptables -t nat -A prerouting_lan_rule -p tcp --dport 53 -j REDIRECT --to-ports 53
+
+			iptables -t filter -C forwarding_lan_rule -j DROP 2>/dev/null || \
+			iptables -t filter -A forwarding_lan_rule -j DROP 2>/dev/null
+
+			iptables -t nat -C prerouting_lan_rule -p tcp --dport 80 -j REDIRECT --to-ports 80 2>/dev/null || \
+			iptables -t nat -A prerouting_lan_rule -p tcp --dport 80 -j REDIRECT --to-ports 80
+
+			echo "address=/./192.168.15.1" >/tmp/dnsmasq.d/all.conf
+			/etc/init.d/dnsmasq reload
+		}
+		return 0
+	}
+
+	iptables -t nat -D prerouting_lan_rule -p udp --dport 53 -j REDIRECT --to-ports 53 2>/dev/null
+	iptables -t nat -D prerouting_lan_rule -p tcp --dport 53 -j REDIRECT --to-ports 53 2>/dev/null
+
+	iptables -t filter -D forwarding_lan_rule -j DROP 2>/dev/null
+
+	iptables -t nat -D prerouting_lan_rule -p tcp --dport 80 -j REDIRECT --to-ports 80 2>/dev/null
+
+	test -e /tmp/dnsmasq.d/all.conf && {
+		rm -f /tmp/dnsmasq.d/all.conf
+		/etc/init.d/dnsmasq reload
+	}
+}
+
 case "$ACTION" in
 	add|ifchange)
 		case "$INTERFACE" in
 			eth0.1)
 				ifname="$INTERFACE" handle_if_event &
+				handle_if_event_fw &
 			;;
 			br-lan)
 				ifname="$INTERFACE" handle_if_event_net &
+				handle_if_event_fw &
 			;;
 			wlan0)
 				ifname="$INTERFACE" handle_if_event_net &
+				handle_if_event_fw &
 			;;
 		esac
 	;;
@@ -120,12 +160,15 @@ case "$ACTION" in
 		case "$DEVICE" in
 			eth0.1)
 				ifname="$DEVICE" handle_if_event &
+				handle_if_event_fw &
 			;;
 			br-lan)
 				ifname="$DEVICE" handle_if_event_net &
+				handle_if_event_fw &
 			;;
 			wlan0)
 				ifname="$DEVICE" handle_if_event_net &
+				handle_if_event_fw &
 			;;
 		esac
 	;;
