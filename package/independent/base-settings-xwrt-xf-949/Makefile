@@ -85,6 +85,8 @@ define Package/base-settings-xwrt-xf-949/install
 	$(INSTALL_DATA) ./files/luci-mod-usb.json $(1)/usr/share/rpcd/acl.d/luci-mod-usb.json
 	$(INSTALL_DIR) $(1)/usr/libexec/rpcd
 	$(INSTALL_BIN) ./files/luci.usb $(1)/usr/libexec/rpcd/luci.usb
+	$(INSTALL_DIR) $(1)/www/redirect
+	$(INSTALL_BIN) ./files/index.cgi $(1)/www/redirect/index.cgi
 endef
 
 define Build/Configure

@@ -145,6 +145,19 @@ uci set dhcp.@domain[1].name='print.ug'
 uci set dhcp.@domain[1].ip='192.168.15.1'
 uci commit dhcp
 
+uci set uhttpd.redirect=uhttpd
+uci set uhttpd.redirect.listen_http='0.0.0.0:18080'
+uci set uhttpd.redirect.home='/www/redirect'
+uci set uhttpd.redirect.index_page='index.cgi'
+uci set uhttpd.redirect.interpreter='.cgi=/bin/sh'
+uci add_list uhttpd.redirect.alias='/connecttest.txt=/index.cgi'
+uci add_list uhttpd.redirect.alias='/ncsi.txt=/index.cgi'
+uci add_list uhttpd.redirect.alias='/redirect=/index.cgi'
+uci add_list uhttpd.redirect.alias='/hotspot-detect.html=/index.cgi'
+uci add_list uhttpd.redirect.alias='/library/test/success.html=/index.cgi'
+uci add_list uhttpd.redirect.alias='/generate_204=/index.cgi'
+uci add_list uhttpd.redirect.alias='/check_network_status.txt=/index.cgi'
+
 uci delete uhttpd.main.listen_https
 uci commit uhttpd
 
