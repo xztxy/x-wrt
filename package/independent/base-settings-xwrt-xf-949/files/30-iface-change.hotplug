@@ -112,8 +112,10 @@ handle_if_event_fw()
 
 	lock /var/run/iface-change-web.lck
 
-	test -n "${wan_ip}" || test -n "${wwan_ip}" || {
-		test -e /tmp/dnsmasq.d/all.conf || {
+	if test -n "${wan_ip}" || test -n "${wwan_ip}"; then
+		:
+	else
+		if ! test -e /tmp/dnsmasq.d/all.conf; then
 			iptables -t nat -C prerouting_lan_rule -p udp --dport 53 -j REDIRECT --to-ports 53 2>/dev/null || \
 			iptables -t nat -A prerouting_lan_rule -p udp --dport 53 -j REDIRECT --to-ports 53
 			iptables -t nat -C prerouting_lan_rule -p tcp --dport 53 -j REDIRECT --to-ports 53 2>/dev/null || \
@@ -122,17 +124,17 @@ handle_if_event_fw()
 			iptables -t filter -C forwarding_lan_rule -j DROP 2>/dev/null || \
 			iptables -t filter -A forwarding_lan_rule -j DROP 2>/dev/null
 
-			iptables -t nat -C prerouting_lan_rule -p tcp --dport 80 -j REDIRECT --to-ports 18080 2>/dev/null || {
+			if ! iptables -t nat -C prerouting_lan_rule -p tcp --dport 80 -j REDIRECT --to-ports 18080 2>/dev/null; then
 				iptables -t nat -A prerouting_lan_rule -p tcp --dport 80 -d ${lan_ip} -j RETURN
 				iptables -t nat -A prerouting_lan_rule -p tcp --dport 80 -j REDIRECT --to-ports 18080
-			}
+			fi
 
 			echo "address=/./1.2.3.4" >/tmp/dnsmasq.d/all.conf
 			/etc/init.d/dnsmasq restart
-		}
+		fi
 		lock -u /var/run/iface-change-web.lck
 		return 0
-	}
+	fi
 
 	iptables -t nat -D prerouting_lan_rule -p udp --dport 53 -j REDIRECT --to-ports 53 2>/dev/null
 	iptables -t nat -D prerouting_lan_rule -p tcp --dport 53 -j REDIRECT --to-ports 53 2>/dev/null
