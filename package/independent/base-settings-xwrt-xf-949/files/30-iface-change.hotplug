@@ -44,7 +44,7 @@ handle_if_event_net() {
 	test -e /var/run/iface-change.running && touch /var/run/iface-change.running.wait
 
 	lock /var/run/iface-change-net.lck
-	rm /var/run/iface-change.running.wait
+	rm -f /var/run/iface-change.running.wait
 
 	wan_ip=$(ubus call network.interface.wan status | jsonfilter -e '@["ipv4-address"][0].address')
 	test -n "${wan_ip}" || wan_ip=$(ubus call network.interface.wwan status | jsonfilter -e '@["ipv4-address"][0].address')
