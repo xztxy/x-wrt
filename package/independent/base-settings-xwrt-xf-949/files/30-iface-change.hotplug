@@ -108,7 +108,6 @@ handle_if_event_fw()
 	if test -n "${wan_ip}" || test -n "${wwan_ip}"; then
 		:
 	else
-		if ! test -e /tmp/dnsmasq.d/all.conf; then
 			iptables -t nat -C prerouting_lan_rule -p udp --dport 53 -j REDIRECT --to-ports 53 2>/dev/null || \
 			iptables -t nat -A prerouting_lan_rule -p udp --dport 53 -j REDIRECT --to-ports 53
 			iptables -t nat -C prerouting_lan_rule -p tcp --dport 53 -j REDIRECT --to-ports 53 2>/dev/null || \
@@ -122,6 +121,7 @@ handle_if_event_fw()
 				iptables -t nat -A prerouting_lan_rule -p tcp --dport 80 -j REDIRECT --to-ports 18080
 			fi
 
+		if ! test -e /tmp/dnsmasq.d/all.conf; then
 			echo "address=/./1.2.3.4" >/tmp/dnsmasq.d/all.conf
 			/etc/init.d/dnsmasq restart
 		fi
@@ -143,6 +143,8 @@ handle_if_event_fw()
 	}
 	lock -u /var/run/iface-change-web.lck
 }
+
+mkdir -p /var/run
 
 case "$ACTION" in
 	add|ifchange)
