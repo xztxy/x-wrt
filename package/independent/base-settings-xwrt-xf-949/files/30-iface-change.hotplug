@@ -40,11 +40,8 @@ handle_if_event_net() {
 	logger -t handle_if_event_net ifname=$ifname ACTION=$ACTION
 	need_reload=0
 	mkdir -p /var/run
-	test -e /var/run/iface-change.running && test -e /var/run/iface-change.running.wait && return
-	test -e /var/run/iface-change.running && touch /var/run/iface-change.running.wait
 
 	lock /var/run/iface-change-net.lck
-	rm -f /var/run/iface-change.running.wait
 
 	wan_ip=$(ubus call network.interface.wan status | jsonfilter -e '@["ipv4-address"][0].address')
 	test -n "${wan_ip}" || wan_ip=$(ubus call network.interface.wwan status | jsonfilter -e '@["ipv4-address"][0].address')
@@ -78,7 +75,6 @@ handle_if_event_net() {
 	fi
 
 	if [ "$need_reload" = "1" ]; then
-		touch /var/run/iface-change.running
 		logger -t handle_if_event_net ifname=$ifname ACTION=$ACTION reload network set wifi off
 		#ubus call network reload
 		#sleep 30
@@ -86,9 +82,7 @@ handle_if_event_net() {
 		hostapd_cli -i ap1 set ignore_broadcast_ssid 1
 		hostapd_cli -i ap1 disable
 		hostapd_cli -i ap1 enable
-		rm -f /var/run/iface-change.running
 	elif [ "$need_reload" = "2" ]; then
-		touch /var/run/iface-change.running
 		logger -t handle_if_event_net ifname=$ifname ACTION=$ACTION reload network set wifi on ssid="$(uci get wireless.wifinet1.ssid)"
 		#ubus call network reload
 		#sleep 30
@@ -96,7 +90,6 @@ handle_if_event_net() {
 		hostapd_cli -i ap1 set ignore_broadcast_ssid 0
 		hostapd_cli -i ap1 disable
 		hostapd_cli -i ap1 enable
-		rm -f /var/run/iface-change.running
 	fi
 
 	lock -u /var/run/iface-change-net.lck
