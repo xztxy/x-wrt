@@ -16,6 +16,9 @@
 	local path = table.concat(disp.context.path, "-")
 
 	http.prepare_content("text/html; charset=UTF-8")
+
+	local uci = (require "luci.model.uci").cursor()
+	local orig_lang = uci:get("luci", "main", "lang")
 -%>
 
 <html lang="<%=luci.i18n.context.lang%>">
@@ -1325,20 +1328,27 @@
                        <p><%:Invalid username and/or password! Please try again.%></p>
                 </div>
         <% end -%>
-                <div data-v-2e6336a5 class="international set-language el-dropdown">
-                    <div aria-haspopup=list aria-controls=dropdown-menu-4687 role=button tabindex=0 onclick="showLanguage()"
-                        class=el-dropdown-selfdefine><svg data-v-2dd0c1a2 aria-hidden=true
-                            class="svg-icon international-icon">
-                            <use data-v-2dd0c1a2 xlink:href=#icon-language></use>
-                        </svg></div>
-                        <ul class="el-dropdown-menu el-popper" id=dropdown-menu-4687
-                        style="transform-origin:center top;z-index:2007;position: absolute;;top:18px;left:-70px;display: none;" x-placement=bottom-end>
-                        <li tabindex=-1 class=el-dropdown-menu__item  onclick="switchLanguage(this, 'zh-cn')">中文</li>
-                        <li tabindex=-1 class=el-dropdown-menu__item onclick="switchLanguage(this, 'en')">English</li>
-                        <div x-arrow class=popper__arrow style=left:65px></div>
-                    </ul>
+<input id="username" type="hidden" autocomplete=on name=luci_username placeholder=用户名 class=el-input__inner value="root">
+                <!-- 语言选择下拉框 -->
+                <div data-v-2e6336a5 class="el-form-item" style="margin-bottom: 22px;">
+                    <div class="el-form-item__content">
+                        <span data-v-2e6336a5 class="svg-container"><svg data-v-2dd0c1a2
+                            data-v-2e6336a5 aria-hidden="true" class="svg-icon">
+                            <use data-v-2dd0c1a2 xlink:href="#icon-language"></use>
+                        </svg></span>
+                        <div data-v-2e6336a5 class="el-dropdown" style="width: 90%;">
+                            <div onclick="showLanguageSelect()" class="el-input" style="cursor: pointer; width: 100%;">
+                                <input readonly id="languageDisplay" class="el-input__inner" value="中文" style="cursor: pointer;" placeholder="选择语言">
+                                <span style="position: absolute; right: 0px; top: 50%; transform: translateY(-50%); color: #c0c4cc;">▼</span>
+                            </div>
+                            <ul class="el-dropdown-menu" id="languageDropdown" style="display: none; position: absolute; width: 85%; z-index: 2007; background: #fff; border: 1px solid #ebeef5; border-radius: 4px; box-shadow: 0 2px 12px 0 rgba(0,0,0,.1); margin-top: 2px;">
+                                <li class="el-dropdown-menu__item" onclick="selectLanguage('auto', 'Auto')" style="padding-left: 45px;">Auto</li>
+                                <li class="el-dropdown-menu__item" onclick="selectLanguage('en', 'English')" style="padding-left: 45px;">English</li>
+                                <li class="el-dropdown-menu__item" onclick="selectLanguage('zh-cn', '中文')" style="padding-left: 45px;">中文</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-			<input id="username" type="hidden" autocomplete=on name=luci_username placeholder=用户名 class=el-input__inner value="root">
                 <div data-v-2e6336a5 class="el-form-item is-required">
                     <div class=el-form-item__content><span data-v-2e6336a5 class=svg-container><svg data-v-2dd0c1a2
                                 data-v-2e6336a5 aria-hidden=true class=svg-icon>
@@ -1359,65 +1369,109 @@
                             class="el-button el-button--primary" style=width:100%><span id='login'>登录</span></button></div>
                 </div>
                 <div data-v-2e6336a5 align=center class=tips><span data-v-2e6336a5 style=margin-right:20px><a
-                            data-v-2e6336a5 href=http://www.lanconvey.com/ target=_blank>绿联网络 © 2020-2026 版权所有
+                            data-v-2e6336a5 href=https://www.lulian.cn/ target=_blank>绿联网络 © 2020-2026 版权所有
                             </a></span></div>
             </form>
         </div>
     </div>
 <script>
-   function switchLanguage (t, lang) {
-    let setLanguage=document.getElementById('dropdown-menu-4687')
-    let luci_lang=document.getElementById("luci_lang")
-    let title=document.getElementsByClassName('title')[0]
-    let tips=document.getElementsByClassName('tips')[0]
-    let login=document.getElementById('login')
-    let userName=document.getElementById('username')
-    let passWord=document.getElementById('password')
-       if(lang=='zh-cn')  {
-        luci_lang.value='zh_cn'
-        document.title=title.innerText='USB设备共享器'
-        tips.innerText="绿联网络 © 2020-2026 版权所有"
-        login.innerText='登录'
-        userName.setAttribute("placeholder","用户名");
-        passWord.setAttribute("placeholder","密码");
-       }
-       else  {
-        luci_lang.value='en'
-        document.title=title.innerText='USB Device Share'
-        tips.innerText="Ugreen Network@2020-2026 All rights reserved"
-        login.innerText='Login'
-        userName.setAttribute("placeholder","Username");
-        passWord.setAttribute("placeholder","Password");
-       }
-      
-       setLanguage.style.display='none'
-   }
-   function showLanguage() {
-        let setLanguage=document.getElementById('dropdown-menu-4687')
-        if(setLanguage.style.display!=='none') {
-            setLanguage.style.display='none'
+   // 显示/隐藏语言选择下拉框
+   function showLanguageSelect() {
+        let dropdown = document.getElementById('languageDropdown')
+        if(dropdown.style.display === 'none' || dropdown.style.display === '') {
+            dropdown.style.display = 'block'
+        } else {
+            dropdown.style.display = 'none'
         }
-        else {
-            setLanguage.style.display="block"
-        }
-        
    }
+
+function getUserLang() {
+	if (navigator.languages && navigator.languages.length) {
+		return navigator.languages[0]; // 现代浏览器优先
+	}
+	return navigator.language || navigator.userLanguage; // 兼容 IE
+}
+
+   // 选择语言
+   function selectLanguage(lang, displayText) {
+        let display = document.getElementById('languageDisplay')
+        let dropdown = document.getElementById('languageDropdown')
+        let luci_lang = document.getElementById("luci_lang")
+        let title = document.getElementsByClassName('title')[0]
+        let tips = document.getElementsByClassName('tips')[0]
+        let login = document.getElementById('login')
+        let userName = document.getElementById('username')
+        let passWord = document.getElementById('password')
+
+        // 更新显示文本
+        display.value = displayText
+
+	if (lang == 'auto' && getUserLang().toLowerCase().startsWith("zh")) {
+		lang = 'zh-cn'
+		luci_lang.value = 'auto'
+	} else if (lang == 'zh-cn') {
+		luci_lang.value = 'zh_cn'
+	} else {
+		luci_lang.value = 'en'
+	}
+
+        // 更新语言设置和界面文本
+        if(lang == 'zh-cn') {
+            document.title = title.innerText = 'USB设备共享器'
+            tips.innerText = "绿联网络 © 2020-2026 版权所有"
+            login.innerText = '登录'
+            userName.setAttribute("placeholder", "用户名")
+            passWord.setAttribute("placeholder", "密码")
+            display.setAttribute("placeholder", "选择语言")
+        } else {
+            document.title = title.innerText = 'USB Device Share'
+            tips.innerText = "Ugreen Network@2020-2026 All rights reserved"
+            login.innerText = 'Login'
+            userName.setAttribute("placeholder", "Username")
+            passWord.setAttribute("placeholder", "Password")
+            display.setAttribute("placeholder", "Select Language")
+        }
+
+        // 关闭下拉框
+        dropdown.style.display = 'none'
+   }
+
+   // 显示/隐藏密码
    function showPwd() {
-      let showpwd=document.getElementsByClassName('show-pwd')[0]
-      let hidepwd=document.getElementsByClassName("hide-pwd")[0]
-      let passWord=document.getElementById('password')
+      let showpwd = document.getElementsByClassName('show-pwd')[0]
+      let hidepwd = document.getElementsByClassName("hide-pwd")[0]
+      let passWord = document.getElementById('password')
       
-      if(passWord.getAttribute('type')=='password') {
-        showpwd.style.display='inline-block'
-        hidepwd.style.display='none'
-        passWord.setAttribute("type","text");
-      }else {
-        showpwd.style.display='none'
-        hidepwd.style.display='inline-block'
-        passWord.setAttribute("type","password");
+      if(passWord.getAttribute('type') == 'password') {
+        showpwd.style.display = 'inline-block'
+        hidepwd.style.display = 'none'
+        passWord.setAttribute("type", "text")
+      } else {
+        showpwd.style.display = 'none'
+        hidepwd.style.display = 'inline-block'
+        passWord.setAttribute("type", "password")
       }
    }
-	window.onload=function() {
-		switchLanguage(this, "<%=luci.i18n.context.lang%>");
-	};
+
+   // 点击外部关闭下拉框
+   document.addEventListener('click', function(event) {
+        let dropdown = document.getElementById('languageDropdown')
+        let dropdownContainer = dropdown.parentElement
+
+        if (!dropdownContainer.contains(event.target)) {
+            dropdown.style.display = 'none'
+        }
+   })
+
+   // 页面加载时初始化语言
+   window.onload = function() {
+        let currentLang = "<%=orig_lang%>"
+        if(currentLang === 'auto') {
+            selectLanguage('auto', 'Auto')
+	} else if(currentLang === 'en') {
+            selectLanguage('en', 'English')
+        } else {
+            selectLanguage('zh-cn', '中文')
+        }
+   }
 </script>
