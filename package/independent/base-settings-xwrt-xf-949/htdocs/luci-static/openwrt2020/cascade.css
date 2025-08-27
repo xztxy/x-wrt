@@ -42,7 +42,7 @@
 	color: inherit;
 	font-family: "Helvetica Neue,Helvetica,PingFang SC,Hiragino Sans GB,Microsoft YaHei,SimSun,sans-serif", "sans-serif";
 	border: none;
-	font-size: 100%;
+	/* font-size: 100%; */
 	background: none;
 	outline: none;
 	-webkit-appearance: none;
