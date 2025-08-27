@@ -2055,8 +2055,8 @@ ul.errors {
 		font-size: 10px;
 	}
 	button, .btn {
-		line-height: 1.2rem;
-		font-size: 12px !important;
+		/* line-height: 1.2rem; */
+		/* font-size: 12px !important; */
 	}
 
 	select {
