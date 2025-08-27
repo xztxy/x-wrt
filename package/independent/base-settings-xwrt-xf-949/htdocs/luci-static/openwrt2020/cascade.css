@@ -1289,7 +1289,7 @@ textarea {
 }
 
 .cbi-value > label:first-child {
-	flex: 1 1 40%;
+	flex: 1 1 30%;
 	padding: 0 .5em 0 0;
 }
 
