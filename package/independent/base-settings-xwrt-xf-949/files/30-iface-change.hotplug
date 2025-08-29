@@ -44,6 +44,8 @@ handle_if_event_net() {
 	lock /var/run/iface-change-net.lck
 
 	wan_ip=$(ubus call network.interface.wan status | jsonfilter -e '@["ipv4-address"][0].address')
+	carrier=$(cat /sys/class/net/eth0.1/carrier)
+	[ "$carrier" = "0" ] && wan_ip=""
 	test -n "${wan_ip}" || wan_ip=$(ubus call network.interface.wwan status | jsonfilter -e '@["ipv4-address"][0].address')
 	if test -n "${wan_ip}"; then
 		SSID="$(uci get base_config.@status[0].SSID)"
