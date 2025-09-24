@@ -1,0 +1,15 @@
+diff --git a/mm/page-writeback.c b/mm/page-writeback.c
+index bfb3f903b..c6be69574 100644
+--- a/mm/page-writeback.c
++++ b/mm/page-writeback.c
+@@ -2763,6 +2763,10 @@ static void folio_account_dirtied(struct folio *folio,
+ void folio_account_cleaned(struct folio *folio, struct bdi_writeback *wb)
+ {
+ 	long nr = folio_nr_pages(folio);
++	if (!wb) {
++		dump_stack();
++		return;
++	}
+ 
+ 	lruvec_stat_mod_folio(folio, NR_FILE_DIRTY, -nr);
+ 	zone_stat_mod_folio(folio, NR_ZONE_WRITE_PENDING, -nr);
