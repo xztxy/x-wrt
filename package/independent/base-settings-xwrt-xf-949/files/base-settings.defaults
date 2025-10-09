@@ -139,10 +139,10 @@ uci delete dhcp.wan
 
 uci set dhcp.@domain[0]=domain
 uci set dhcp.@domain[0].name='print.ug.link'
-uci set dhcp.@domain[0].ip='192.168.15.1'
+uci set dhcp.@domain[0].ip='192.168.16.1'
 uci set dhcp.@domain[1]=domain
 uci set dhcp.@domain[1].name='print.ug'
-uci set dhcp.@domain[1].ip='192.168.15.1'
+uci set dhcp.@domain[1].ip='192.168.16.1'
 uci commit dhcp
 
 uci set uhttpd.redirect=uhttpd

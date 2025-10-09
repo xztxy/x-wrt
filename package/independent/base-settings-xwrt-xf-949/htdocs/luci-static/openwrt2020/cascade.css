@@ -88,6 +88,7 @@ body {
 .l1>.mainmenu-item-system{
 	background:url(./system.svg) no-repeat;
 	background-position: 10px 4px;
+	margin-top: 25px;
 }
 .mainmenu-item-syslog{
 	background:url(./syslog.svg) no-repeat;
@@ -104,11 +105,11 @@ body {
 /*
  * scaffholding
  */
- .mainmenu-item-logout,.mainmenu-item-networksetup,.mainmenu-item-networksetup_wifiap,.mainmenu-item-wifiwizard,.mainmenu-item-raw-printer,.mainmenu-item-system {
+ .mainmenu-item-logout,.mainmenu-item-networksetup,.mainmenu-item-networksetup_wifiap,.mainmenu-item-wifiwizard,.mainmenu-item-raw-printer {
 	 margin-top: 25px;
  }
 #menubar {
-	/* background-color: #231815; */
+	background-color: #231815;
 	/* background-image: url("logo.svg"); */
 	background-position: 10px center;
 	background-size: 50px 50px;
