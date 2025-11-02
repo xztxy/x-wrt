@@ -61,10 +61,10 @@ return baseclass.extend({
 
 		var fields = [
 			_('USB Info'),         usbinfo.info ? usbinfo.info : "-",
-			_('WiFi STA'),             wwan,
+			_('Wi-Fi Bridge'),             wwan,
 			_('LAN Port') + "(" + _('auto') + ")",              wan,
 			_('Management IP'),              lan,
-			_('WiFi AP'),            lan
+			_('Wi-Fi AP'),            lan
 		];
 
 		var table = E('table', { 'class': 'table' });

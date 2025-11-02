@@ -160,7 +160,7 @@ return baseclass.extend({
 				L.itemlist(E('span'), [
 					_('Type'), radio.getI18n().replace(/^Generic | Wireless Controller .+$/g, ''),
 					_('Channel'), chan ? '%d (%.3f %s)'.format(chan, freq, _('GHz')) : '-',
-					_('Bitrate'), rate ? '%d %s'.format(rate, _('Mbit/s')) : '-',
+					_('Rate'), rate ? '%d %s'.format(rate, _('Mbit/s')) : '-',
 				]),
 				E('div', {}, badges)
 			])
@@ -355,7 +355,7 @@ return baseclass.extend({
 
 		return E([
 			table,
-			hasReadPermission ? E('h3', _('Associated Stations')) : E([]),
+			hasReadPermission ? E('h3', _('Connected Stations')) : E([]),
 			hasReadPermission ? assoclist : E([])
 		]);
 	}

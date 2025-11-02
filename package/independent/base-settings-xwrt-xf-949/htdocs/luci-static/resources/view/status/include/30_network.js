@@ -48,7 +48,7 @@ function renderbox(ifc, ipv6) {
 				_('DNS') + ' 4', dnssrv[3],
 				_('DNS') + ' 5', dnssrv[4],
 				_('Expires'), (expires != null && expires > -1) ? '%t'.format(expires) : null,
-				_('Connected'), (uptime > 0) ? '%t'.format(uptime) : null
+				_('Connected Duration'), (uptime > 0) ? '%t'.format(uptime) : null
 			]),
 			E('div', {}, renderBadge(
 				L.resource('icons/%s.png').format(dev ? dev.getType() : 'ethernet_disabled'), null,
